@@ -1,0 +1,20 @@
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+config +=
+    c++14
+    Wall
+
+main.includes +=
+    include
+    lib/matgui/include
+    lib/matmath/include
+
+main.src =
+    src/*.cpp
+    lib/matgui/src/*.cpp
+
+main.dir = build
+
+main.libs = -lGL -lSDL2 -lSDL2_image
+
