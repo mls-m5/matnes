@@ -3,3 +3,4 @@
 *.d
 build
 .matnes.*
+test/*_test

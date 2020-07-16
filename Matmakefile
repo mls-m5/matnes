@@ -18,3 +18,4 @@ main.dir = build
 
 main.libs = -lGL -lSDL2 -lSDL2_image
 
+external test

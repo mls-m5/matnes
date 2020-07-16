@@ -4,3 +4,6 @@
 [submodule "lib/matmath"]
 	path = lib/matmath
 	url = https://github.com/mls-m5/matmath
+[submodule "test/mls-unit-test"]
+	path = test/mls-unit-test
+	url = https://github.com/mls-m5/mls-unit-test

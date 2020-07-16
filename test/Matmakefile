@@ -1,0 +1,16 @@
+
+config += Wall debug c++17
+
+includes +=
+   ../lib/matgui/include
+   ../src
+
+src +=
+   ../src/*.cpp
+   ../lib/matgui/src/*.cpp
+
+libs += -lGL -lSDL2 -lSDL2_image
+
+define += TEST
+
+assembler_test.src += %.cpp
