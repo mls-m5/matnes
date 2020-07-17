@@ -28,25 +28,75 @@ constexpr void ADC(Cpu &cpu, uint8_t value) {
     cpu.A() += value;
 }
 
+// using FunctionType =  std::function<void(Cpu &, uint8_t)>;
+using FunctionType = void (*)(Cpu &, uint8_t);
+
+struct Immediate {
+    void operator()(Cpu &cpu, uint8_t *data) {
+        f(cpu, data[1]);
+    }
+
+    FunctionType f;
+};
+
+struct Absolute {
+    void operator()(Cpu &cpu, uint8_t *data) {
+        f(cpu, cpu.ram(data[1], data[2]));
+    }
+
+    FunctionType f;
+};
+
+struct AbsoluteZeroPage {
+    void operator()(Cpu &cpu, uint8_t *data) {
+        f(cpu, cpu.ram(data[1]));
+    }
+
+    FunctionType f;
+};
+
+struct Implied {
+    void operator()(Cpu &cpu, uint8_t *) {
+        f(cpu, 0);
+    }
+
+    FunctionType f;
+};
+
+struct AccumulatorValue {
+    void operator()(Cpu &cpu, uint8_t *) {
+        f(cpu, cpu.A());
+    }
+
+    FunctionType f;
+};
+
+struct Indirect {
+    Indirect(FunctionType f) : f(f) {
+    }
+
+    void operator()(Cpu &cpu, uint8_t *data) {
+        //        f(cpu, cpu.ram(data[1], data[2]));
+        // todo: fix this
+    }
+
+    FunctionType f;
+};
+
 void initOperations() {
 
     auto &op = operations;
-    // ADC
-    op[0x69] = {2, 2, [](Cpu &cpu, uint8_t *data) {
-                    ADC(cpu, data[1]);
-                }};
-    op[0x65] = {2, 4, [](Cpu &cpu, uint8_t *data) {
-                    ADC(cpu, cpu.ram(data[1]));
-                }};
+
+    op[0x69] = {2, 2, Immediate{ADC}};
+    op[0x65] = {2, 3, AbsoluteZeroPage{ADC}};
     //...
-    op[0x60] = {2, 4, [](Cpu &cpu, uint8_t *data) {
-                    ADC(cpu, cpu.ram(data[1], data[2]));
-                }};
+    op[0x60] = {2, 4, Absolute{ADC}};
 
     // AND
-    op[0x29] = {2, 4, [](Cpu &cpu, uint8_t *data) {
-                    AND(cpu, cpu.ram(data[1], data[2]));
-                }};
+    op[0x29] = {2, 4, Immediate{ADC}};
+    op[0x25] = {2, 3, AbsoluteZeroPage{ADC}};
+    //..
+    op[0x20] = {2, 4, AbsoluteZeroPage{ADC}};
 }
 
 } // namespace

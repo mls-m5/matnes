@@ -10,8 +10,16 @@
 
 TEST_SUIT_BEGIN
 
-TEST_CASE("Immediate mode") {
-    ASSERT_EQ(translateAssemblyLine("ADC #$AB"), "\xa9\xab");
+// http://nesdev.com/6502.txt
+
+TEST_CASE("ADC") {
+    ASSERT_EQ(translateAssemblyLine("ADC #$AB"), "\x69\xab");
+    ASSERT_EQ(translateAssemblyLine("ADC $AB"), "\x65\xab");
+    ASSERT_EQ(translateAssemblyLine("ADC $ABCD"), "\x60\xab\xcd");
+}
+
+TEST_CASE("LDA") {
+    ASSERT_EQ(translateAssemblyLine("LDA #$AB"), "\xa9\xab");
 }
 
 TEST_SUIT_END
