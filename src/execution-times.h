@@ -24,7 +24,7 @@
 //   one aditional if branching operation crosses page boundary
 // 0 means that the operation is not implemented on the nes
 
-namespace nes {
+namespace matnes {
 namespace cpu {
 
 // clang-format off
@@ -116,10 +116,10 @@ constexpr int executionTimeConstants[4][13][14] = {
 // clang-format on
 
 constexpr int getExecutionTime(Instruction instruction, MemoryMode mode) {
-    auto subInstruction = instruction % 13;
-    auto chunk = instruction - subInstruction;
+    auto subInstruction = instruction % 14;
+    auto chunk = instruction / 14;
     return executionTimeConstants[chunk][mode][subInstruction];
 }
 
 } // namespace cpu
-} // namespace nes
+} // namespace matnes

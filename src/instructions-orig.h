@@ -16,7 +16,6 @@
 // 0F - Future Expansion
 // 10 - BPL
 // 11 - ORA - (Indirect),Y
-// 31 - AND - (Indirect),Y
 // 12 - Future Expansion
 // 13 - Future Expansion
 // 14 - Future Expansion
@@ -48,6 +47,7 @@
 // 2E - ROL - Absolute
 // 2F - Future Expansion
 // 30 - BMI
+// 31 - AND - (Indirect),Y
 // 32 - Future Expansion
 // 33 - Future Expansion
 // 34 - Future Expansion
@@ -64,7 +64,6 @@
 // 3F - Future Expansion
 // 40 - RTI
 // 41 - EOR - (Indirect,X)
-// 61 - ADC - (Indirect,X)
 // 42 - Future Expansion
 // 43 - Future Expansion
 // 44 - Future Expansion
@@ -81,7 +80,6 @@
 // 4F - Future Expansion
 // 50 - BVC
 // 51 - EOR - (Indirect),Y
-// 71 - ADC - (Indirect),Y
 // 52 - Future Expansion
 // 53 - Future Expansion
 // 54 - Future Expansion
@@ -97,6 +95,7 @@
 // 5E - LSR - Absolute,X
 // 5F - Future Expansion
 // 60 - RTS
+// 61 - ADC - (Indirect,X)
 // 62 - Future Expansion
 // 63 - Future Expansion
 // 64 - Future Expansion
@@ -111,8 +110,8 @@
 // 6D - ADC - Absolute
 // 6E - ROR - Absolute
 // 6F - Future Expansion
-// 7D - ADC - Absolute,X
 // 70 - BVS
+// 71 - ADC - (Indirect),Y
 // 72 - Future Expansion
 // 73 - Future Expansion
 // 74 - Future Expansion
@@ -124,12 +123,12 @@
 // 7A - Future Expansion
 // 7B - Future Expansion
 // 7C - Future Expansion
+// 7D - ADC - Absolute,X
 // 7E - ROR - Absolute,X
 // 7F - Future Expansion
 // 80 - Future Expansion
 // 80 - STA - Absolute
 // 81 - STA - (Indirect,X)
-// A1 - LDA - (Indirect,X)
 // 82 - Future Expansion
 // 83 - Future Expansion
 // 84 - STY - Zero Page
@@ -145,7 +144,6 @@
 // 8F - Future Expansion
 // 90 - BCC
 // 91 - STA - (Indirect),Y
-// B1 - LDA - (Indirect),Y
 // 92 - Future Expansion
 // 93 - Future Expansion
 // 94 - STY - Zero Page,X
@@ -161,6 +159,7 @@
 // 9E - Future Expansion
 // 9F - Future Expansion
 // A0 - LDY - Immediate
+// A1 - LDA - (Indirect,X)
 // A2 - LDX - Immediate
 // A3 - Future Expansion
 // A4 - LDY - Zero Page
@@ -176,9 +175,11 @@
 // AE - LDX - Absolute
 // AF - Future Expansion
 // B0 - BCS
+// B1 - LDA - (Indirect),Y
 // B2 - Future Expansion
 // B3 - Future Expansion
 // B4 - LDY - Zero Page,X
+// B5 - LDA - Zero Page,X
 // B6 - LDX - Zero Page,Y
 // B7 - Future Expansion
 // B8 - CLV
@@ -189,10 +190,8 @@
 // BD - LDA - Absolute,X
 // BE - LDX - Absolute,Y
 // BF - Future Expansion
-// B5 - LDA - Zero Page,X
 // C0 - Cpy - Immediate
 // C1 - CMP - (Indirect,X)
-// E1 - SBC - (Indirect,X)
 // C2 - Future Expansion
 // C3 - Future Expansion
 // C4 - CPY - Zero Page
@@ -209,7 +208,6 @@
 // CF - Future Expansion
 // D0 - BNE
 // D1 - CMP   (Indirect@,Y
-// F1 - SBC - (Indirect),Y
 // D2 - Future Expansion
 // D3 - Future Expansion
 // D4 - Future Expansion
@@ -225,6 +223,7 @@
 // DE - DEC - Absolute,X
 // DF - Future Expansion
 // E0 - CPX - Immediate
+// E1 - SBC - (Indirect,X)
 // E2 - Future Expansion
 // E3 - Future Expansion
 // E4 - CPX - Zero Page
@@ -240,6 +239,7 @@
 // EE - INC - Absolute
 // EF - Future Expansion
 // F0 - BEQ
+// F1 - SBC - (Indirect),Y
 // F2 - Future Expansion
 // F3 - Future Expansion
 // F4 - Future Expansion

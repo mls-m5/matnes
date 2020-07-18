@@ -2,7 +2,7 @@
 # https://github.com/mls-m5/matmake
 
 config +=
-    c++14
+    c++17
     Wall
 
 main.includes +=
