@@ -17,6 +17,10 @@ union Conversion {
     uint16_t u16;
 };
 
+class NotImplementedError : public std::logic_error {
+    using logic_error::logic_error;
+};
+
 class Cpu {
 public:
     constexpr Cpu() = default;
@@ -50,8 +54,47 @@ public:
         return _xIndex;
     }
 
+    constexpr void X(uint8_t value) {
+        _xIndex = value;
+    }
+
     [[nodiscard]] constexpr auto Y() const {
         return _yIndex;
+    }
+
+    constexpr void Y(uint8_t value) {
+        _yIndex = value;
+    }
+
+    [[nodiscard]] constexpr auto stack() const {
+        return _stackPointer;
+    }
+
+    constexpr void stack(uint8_t value) {
+        _stackPointer = value;
+    }
+
+    constexpr uint8_t pull() {
+        // Todo check if order is correct;
+        auto value = ramBig(_stackPointer);
+        ++_stackPointer;
+        return value;
+    }
+
+    constexpr void push(uint8_t value) {
+        // Todo: Check if order (decreesing and saving) is correct
+        --_stackPointer;
+        ramBig(_stackPointer) = value;
+    }
+
+    // Status flags ----------------------------
+
+    [[nodiscard]] constexpr uint8_t S() {
+        return _stackPointer;
+    }
+
+    constexpr void S(uint8_t value) {
+        _stackPointer = value;
     }
 
     //! C
@@ -70,6 +113,11 @@ public:
 
     constexpr void zero(bool value) {
         statusFlag(1, value);
+    }
+
+    constexpr auto updateZero(uint8_t value) {
+        zero(value);
+        return value;
     }
 
     //! I
@@ -117,6 +165,13 @@ public:
         statusFlag(7, value);
     }
 
+    constexpr auto updateSign(uint8_t value) {
+        signFlag(value & (1 << 7));
+        return value;
+    }
+
+    // -----------------------
+
     [[nodiscard]] constexpr uint8_t &ram(uint8_t index1, uint8_t index2 = 0) {
         return _ram[(static_cast<int>(index2) << 8) + index1];
     }
@@ -144,6 +199,186 @@ public:
     // Composite src
     constexpr uint16_t srcBig() const {
         return (static_cast<uint16_t>(src2()) << 8) + src();
+    }
+
+    // Set sign and zero bits
+    constexpr uint8_t updateStatus(uint8_t value) {
+        updateSign(value);
+        updateZero(value);
+        return value;
+    }
+
+    // ---------------------- Instructions -------------------------------------
+
+    constexpr void ADC(uint8_t &) {
+    }
+
+    constexpr void AND(uint8_t &) {
+    }
+
+    constexpr void ASL(uint8_t &) {
+    }
+
+    // continue here.. uppward
+
+    constexpr void EOR(uint8_t &memory) {
+        A(updateStatus(A() ^ memory));
+    }
+
+    constexpr void INC(uint8_t &memory) {
+        memory = updateStatus((memory + 1));
+    }
+
+    constexpr void INX(uint8_t &) {
+        X(updateStatus(X() + 1));
+    }
+
+    constexpr void INY(uint8_t &) {
+        Y(updateStatus(Y() + 1));
+    }
+
+    constexpr void JMP(uint8_t &) {
+        _programCounter = srcBig();
+    }
+
+    constexpr void JSR(uint8_t &) {
+        --_programCounter;
+        push(_programCounter >> 8);
+        push(_programCounter & 0xff);
+        _programCounter = srcBig();
+    }
+
+    constexpr void LDA(uint8_t &memory) {
+        A(updateStatus(memory));
+    }
+
+    constexpr void LDX(uint8_t &memory) {
+        X(updateStatus(memory));
+    }
+
+    constexpr void LDY(uint8_t &memory) {
+        Y(updateStatus(memory));
+    }
+
+    constexpr void LSR(uint8_t &memory) {
+        carry(memory | 1);
+        memory >>= 1;
+        updateStatus(memory);
+    }
+
+    constexpr void NOP(uint8_t &) {
+        // Doing nothing for a while...
+    }
+
+    constexpr void ORA(uint8_t &value) {
+        A(updateStatus(A() | value));
+    }
+
+    constexpr void PHA(uint8_t &) {
+        push(A());
+    }
+
+    constexpr void PHP(uint8_t &) {
+        push(S());
+    }
+
+    constexpr void PLA(uint8_t &) {
+        A(pull());
+    }
+
+    constexpr void PLP(uint8_t &) {
+        S(pull());
+    }
+
+    constexpr void ROL(uint8_t &memory) {
+        auto value = (memory << 1) + carry();
+        carry(value & 0x100);
+        value &= 0xff;
+        updateStatus(value);
+        memory = value;
+    }
+
+    constexpr void ROR(uint8_t &memory) {
+        auto value = memory + carry() * 0x100;
+        carry(value & 1);
+        value >>= 1;
+        updateStatus(value);
+        memory = value;
+    }
+
+    constexpr void RTI(uint8_t &) {
+        S(pull());
+        uint8_t value = pull();
+        value += pull() * 0x100;
+        _programCounter = value;
+    }
+
+    constexpr void RTS(uint8_t &) {
+        uint16_t value = pull();
+        value += pull() * 0x100 + 1;
+        _programCounter = value;
+    }
+
+    constexpr void SBC(uint8_t &value) {
+        // Subtract with carry
+        auto tmp = static_cast<uint16_t>(A()) - value - carry();
+        updateStatus(tmp);
+        overflowFlag(((A() ^ tmp) & 0x80) && ((A() ^ tmp) & 0x80));
+        carry(!(tmp < 0x100)); // Todo: Check so that this is correct
+    }
+
+    // set flags
+
+    constexpr void SEC(uint8_t &) {
+        carry(true);
+    }
+
+    constexpr void SED(uint8_t &) {
+        decimalFlag(true);
+    }
+
+    constexpr void SEI(uint8_t &) {
+        disableInterupts(true);
+    }
+
+    // Store to memory
+
+    constexpr void STA(uint8_t &memory) {
+        memory = A();
+    }
+
+    constexpr void STX(uint8_t &memory) {
+        memory = X();
+    }
+
+    constexpr void STY(uint8_t &memory) {
+        memory = Y();
+    }
+
+    // Translate instructions
+
+    constexpr void TAX(uint8_t &) {
+        X(updateStatus(A()));
+    }
+
+    constexpr void TAY(uint8_t &) {
+        Y(updateStatus(A()));
+    }
+
+    constexpr void TSX(uint8_t &) {
+        X(updateStatus(S()));
+    }
+
+    constexpr void TXA(uint8_t &) {
+        A(updateStatus(X()));
+    }
+
+    constexpr void TXS(uint8_t &) {
+        S(X());
+    }
+
+    constexpr void TYA(uint8_t &) {
+        A(updateStatus(Y()));
     }
 
     // ---------------------- Memory modes -------------------------------------
@@ -235,7 +470,7 @@ private:
     uint8_t _yIndex = 0;
     uint8_t _status = 1 << 5;
     uint16_t _programCounter = 0;
-    uint8_t _stackPointer = 0;
+    uint16_t _stackPointer = 0;
 
     std::array<uint8_t, 1024 * 2> _ram = {};
 };
