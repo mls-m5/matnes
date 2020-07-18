@@ -1,5 +1,9 @@
 #pragma once
 
+#include "execution-times.h"
+
+// http://nesdev.com/6502.txt
+
 enum Instruction {
     ADC, // Add Memory to Accumulator with Carry
     AND, //"AND" Memory with Accumulator
@@ -73,18 +77,19 @@ enum Instruction {
     TYA, // Transfer Index Y to Accumulator
 };
 
-enum AddressMode {
-    Immediate,
-    Absolute,
-    ZeroPageAbsolute,
-    Implied,
+enum MemoryMode {
     Accumulator,
-    IndexedX,
-    IndexedY,
-    ZeroPagedIndexedX,
-    ZeroPagedIndexedY,
-    Indirect,            // () around operand
-    PreIndexedIndirect,  // X register only
-    PostIndexedIndirect, // Y register only
-    Relative
+    Immediate,
+    ZeroPage,
+    ZeroPageX,
+    ZeroPageY,
+    Absolute,
+    AbsoluteX,
+    AbsoluteY,
+    Implied,
+    Relative,
+    _IndirectX_,
+    _Indirect_Y,
+    Indirect,
+    AbsoluteIndirect, // Only used in one op
 };
