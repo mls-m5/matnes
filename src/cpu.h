@@ -5,17 +5,29 @@
 #include <array>
 #include <cstdint>
 
-// Convert between 8 and 16 bit integers
-union Conversion {
-    constexpr Conversion(uint16_t value) : u16(value) {
-    }
+//// Convert between 8 and 16 bit integers
+// union Conversion {
+//    constexpr Conversion(uint16_t value) : u16(value) {
+//    }
 
-    constexpr Conversion(uint8_t a, uint8_t b) : u8{a, b} {
-    }
+//    constexpr Conversion(uint8_t a, uint8_t b) : u8{a, b} {
+//    }
 
-    uint8_t u8[2];
-    uint16_t u16;
-};
+//    uint8_t u8[2];
+//    uint16_t u16;
+//};
+
+constexpr uint8_t getHigh(uint16_t value) {
+    return value >> 8;
+}
+
+constexpr uint8_t getLow(uint8_t value) {
+    return value;
+}
+
+constexpr uint16_t merge(uint8_t a, uint8_t b) {
+    return (static_cast<uint16_t>(b) << 8) | a;
+}
 
 class NotImplementedError : public std::logic_error {
     using logic_error::logic_error;
@@ -112,11 +124,11 @@ public:
     }
 
     //! P is for processor status
-    [[nodiscard]] constexpr uint8_t P() {
+    [[nodiscard]] constexpr uint8_t status() {
         return _status;
     }
 
-    constexpr void P(uint8_t value) {
+    constexpr void status(uint8_t value) {
         _status = value;
     }
 
@@ -213,12 +225,27 @@ public:
 
     //! Argument 1
     [[nodiscard]] constexpr uint8_t src() const {
-        return _ram.at(_programCounter + 1);
+        //        return _ram.at(_programCounter + 1);
+        return _src1;
+    }
+
+    constexpr void src(uint8_t value) {
+        _src1 = value;
+    }
+
+    constexpr void src2(uint8_t value) {
+        _src2 = value;
+    }
+
+    constexpr void srcBig(uint16_t value) {
+        _src1 = getLow(value);
+        _src2 = getHigh(value);
     }
 
     // Argument 2
     [[nodiscard]] constexpr uint8_t src2() const {
-        return _ram.at(_programCounter + 2);
+        //        return _ram.at(_programCounter + 2);
+        return _src2;
     }
 
     // Composite src
@@ -280,8 +307,7 @@ public:
 
     constexpr void JSR(uint8_t &) {
         --_programCounter;
-        push(_programCounter >> 8);
-        push(_programCounter & 0xff);
+        pushBig(_programCounter);
         _programCounter = srcBig();
     }
 
@@ -316,7 +342,7 @@ public:
     }
 
     constexpr void PHP(uint8_t &) {
-        push(S());
+        push(status());
     }
 
     constexpr void PLA(uint8_t &) {
@@ -324,7 +350,7 @@ public:
     }
 
     constexpr void PLP(uint8_t &) {
-        S(pull());
+        status(pull());
     }
 
     constexpr void ROL(uint8_t &memory) {
@@ -344,7 +370,7 @@ public:
     }
 
     constexpr void RTI(uint8_t &) {
-        S(pull());
+        status(pull());
         _programCounter = pullBig();
     }
 
@@ -443,11 +469,11 @@ public:
     }
 
     [[nodiscard]] constexpr uint8_t &absoluteX() {
-        return ram(Conversion(src(), src2()).u16 + X());
+        return ram(merge(src(), src2()) + X());
     }
 
     [[nodiscard]] constexpr uint8_t &absoluteY() {
-        return ram(Conversion(src(), src2()).u16 + Y());
+        return ram(merge(src(), src2()) + Y());
     }
 
     [[nodiscard]] constexpr uint8_t &implied() {
@@ -466,7 +492,7 @@ public:
         auto tmp1 = ramBig(tmpSrc);
         auto tmp2 = ramBig(tmpSrc + 1);
 
-        auto postAddress = Conversion(tmp1, tmp2).u16 + Y();
+        auto postAddress = merge(tmp1, tmp2) + Y();
 
         return ram(postAddress);
     }
@@ -517,6 +543,8 @@ private:
     uint8_t _status = 1 << 5; // also called P
     uint16_t _programCounter = 0;
     uint16_t _stackPointer = 0xfd;
+    uint8_t _src1 = 0;
+    uint8_t _src2 = 0;
 
     std::array<uint8_t, 1024 * 2> _ram = {};
 };

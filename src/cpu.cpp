@@ -110,19 +110,19 @@ struct Indirect {
 //    op[0x20] = {2, 4, AbsoluteZeroPage{ADC}};
 //}
 
-void step() {
-    Cpu cpu;
+// void step() {
+//    Cpu cpu;
 
-    {
-        auto instruction = cpu.instruction();
+//    {
+//        auto instruction = cpu.instruction();
 
-        auto info = instructionModes[instruction];
+//        auto info = instructionModes[instruction];
 
-        //        auto src =
+//        //        auto src =
 
-        //        auto src = op.addressMode(cpu);
-        //        op.op(cpu, src);
-    }
-}
+//        //        auto src = op.addressMode(cpu);
+//        //        op.op(cpu, src);
+//    }
+//}
 
 } // namespace
