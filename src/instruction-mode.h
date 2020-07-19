@@ -47,10 +47,26 @@ struct InstructionInfo {
         return nullptr;
     }
 
+    constexpr uint8_t getInstructionLength(MemoryMode mode) {
+        switch (mode) {
+        case Absolute:
+        case AbsoluteX:
+        case AbsoluteY:
+            return 3;
+        case Accumulator:
+        case Implied:
+            return 1;
+        default:
+            return 2;
+        }
+    }
+
     constexpr InstructionInfo(Instruction instruction,
                               MemoryMode mode = Implied)
         : instruction(instruction), mode(mode),
           extraPagingTime(getExecutionTime(instruction, mode) < 0),
+          executionTime(getExecutionTime(instruction, mode)),
+          instructionLength(getInstructionLength(mode)),
           memoryFunction(getMemoryFunction(mode)),
           instructionFunction(getInstructionFunction(instruction)) {
     }
@@ -62,9 +78,10 @@ struct InstructionInfo {
     Instruction instruction = NOP;
     MemoryMode mode = Implied;
     bool extraPagingTime = false;
-    int executionTime = 0;
-    MemoryFunctionType memoryFunction = 0;
-    InstructionFunctionType instructionFunction = 0;
+    uint8_t executionTime = 0;
+    uint8_t instructionLength = 0;
+    MemoryFunctionType memoryFunction = nullptr;
+    InstructionFunctionType instructionFunction = nullptr;
 };
 
 constexpr InstructionInfo instructionModes[] = {

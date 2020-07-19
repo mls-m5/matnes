@@ -42,6 +42,8 @@ public:
         PCL(ramBig(0xfffd));
     }
 
+    void tick();
+
     // Internal data
 
     constexpr bool statusFlag(uint8_t index) const {
