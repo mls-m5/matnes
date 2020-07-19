@@ -5,17 +5,10 @@
 #include <array>
 #include <cstdint>
 
+namespace matnes {
+namespace cpu {
+
 //// Convert between 8 and 16 bit integers
-// union Conversion {
-//    constexpr Conversion(uint16_t value) : u16(value) {
-//    }
-
-//    constexpr Conversion(uint8_t a, uint8_t b) : u8{a, b} {
-//    }
-
-//    uint8_t u8[2];
-//    uint16_t u16;
-//};
 
 constexpr uint8_t getHigh(uint16_t value) {
     return value >> 8;
@@ -27,6 +20,10 @@ constexpr uint8_t getLow(uint8_t value) {
 
 constexpr uint16_t merge(uint8_t a, uint8_t b) {
     return (static_cast<uint16_t>(b) << 8) | a;
+}
+
+constexpr bool isDifferentPage(uint16_t a, uint16_t b) {
+    return (a >> 8) != (b >> 8);
 }
 
 class NotImplementedError : public std::logic_error {
@@ -207,6 +204,12 @@ public:
         return value;
     }
 
+    //! This flag does not really exists but sometimes it needs to be set before
+    //! pushing the status to the stack
+    constexpr auto bFlag(bool value) {
+        statusFlag(4, value);
+    }
+
     // -----------------------
 
     [[nodiscard]] constexpr uint8_t &ram(uint8_t index1, uint8_t index2 = 0) {
@@ -256,22 +259,144 @@ public:
     // Set sign and zero bits
     constexpr uint8_t updateStatus(uint8_t value) {
         updateSign(value);
-        updateZero(value);
+        updateZero(!value);
         return value;
+    }
+
+    constexpr uint8_t updateOverflow(uint8_t value) {
+        overflowFlag(value & 0x80);
+        return value;
+    }
+
+    constexpr uint16_t relativeAddress(uint16_t value) {
+        return _programCounter + value;
+    }
+
+    //! Function used by B.. functions
+    constexpr void branch(uint8_t offset) {
+        ++_extraClockCycles;
+        auto newAddress = relativeAddress(offset);
+        if (isDifferentPage(_programCounter, newAddress)) {
+            ++_extraClockCycles;
+        }
     }
 
     // ---------------------- Instructions -------------------------------------
 
-    constexpr void ADC(uint8_t &) {
+    constexpr void ADC(uint8_t &memory) {
+        uint8_t tmp = static_cast<uint8_t>(A()) + memory + carry();
+        A(updateSign(updateStatus(tmp)));
+
+        // Negative plus positive cannot overflow
+        overflowFlag(((tmp ^ A()) & 0x80) && ((tmp ^ memory) & 0x80));
+        carry(tmp > 0xff);
     }
 
-    constexpr void AND(uint8_t &) {
+    constexpr void AND(uint8_t &memory) {
+        A(updateStatus(A() & memory));
     }
 
-    constexpr void ASL(uint8_t &) {
+    constexpr void ASL(uint8_t &memory) {
+        carry(memory & (1 << 7));
+        memory <<= 1;
+        updateStatus(memory);
     }
 
-    // continue here.. uppward
+    constexpr void BCC(uint8_t &memory) {
+        if (!carry()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BCS(uint8_t &memory) {
+        if (carry()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BEQ(uint8_t &memory) {
+        if (zero()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BIT(uint8_t &memory) {
+        updateOverflow(memory);
+        updateStatus(memory);
+    }
+
+    constexpr void BMI(uint8_t &memory) {
+        if (signFlag()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BNE(uint8_t &memory) {
+        if (!zero()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BPL(uint8_t &memory) {
+        if (!signFlag()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BRK(uint8_t &) {
+        ++_programCounter;
+        pushBig(_programCounter);
+        bFlag(true);
+        push(status());
+        disableInterupts(true);
+        _programCounter = merge(ramBig(0xFFFE), ramBig(0xFFFF));
+    }
+
+    constexpr void BVC(uint8_t &memory) {
+        if (!overflowFlag()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void BVS(uint8_t &memory) {
+        if (overflowFlag()) {
+            branch(memory);
+        }
+    }
+
+    constexpr void CLC(uint8_t &) {
+        carry(false);
+    }
+
+    constexpr void CLD(uint8_t &) {
+        decimalFlag(false);
+    }
+
+    constexpr void CLI(uint8_t &) {
+        disableInterupts(false);
+    }
+
+    constexpr void CLY(uint8_t &) {
+        overflowFlag(false);
+    }
+
+    constexpr void CPM(uint8_t &memory) {
+        auto tmp = static_cast<uint16_t>(A()) - memory;
+        updateStatus(tmp);
+        carry(tmp > 0xff);
+    }
+
+    constexpr void CPX(uint8_t &memory) {
+        auto tmp = static_cast<uint16_t>(X()) - memory;
+        updateStatus(tmp);
+        carry(tmp > 0xff);
+    }
+
+    constexpr void CPY(uint8_t &memory) {
+        auto tmp = static_cast<uint16_t>(Y()) - memory;
+        updateStatus(tmp);
+        carry(tmp > 0xff);
+    }
 
     constexpr void DEC(uint8_t &memory) {
         --memory;
@@ -342,6 +467,7 @@ public:
     }
 
     constexpr void PHP(uint8_t &) {
+        bFlag(true);
         push(status());
     }
 
@@ -522,13 +648,17 @@ public:
         return ramBig(srcBig());
     }
 
-    // Use to send in to functions that requires references
+    // Use to send in to functions that requires constexpr references
     [[nodiscard]] constexpr uint8_t &dummy() {
         return _dummy;
     }
 
     constexpr void dummy(uint8_t value) {
         _dummy = value;
+    }
+
+    constexpr uint8_t extraClockCycles() const {
+        return _extraClockCycles;
     }
 
 private:
@@ -546,5 +676,10 @@ private:
     uint8_t _src1 = 0;
     uint8_t _src2 = 0;
 
+    uint8_t _extraClockCycles = 0; // If instruction demands more time
+
     std::array<uint8_t, 1024 * 2> _ram = {};
 };
+
+} // namespace cpu
+} // namespace matnes

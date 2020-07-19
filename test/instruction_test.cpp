@@ -3,6 +3,8 @@
 #include "mls-unit-test/unittest.h"
 #include "staticmessage.h"
 
+using namespace matnes::cpu;
+
 // Note that most of theese tests will fail at compile time and not at runtime
 
 TEST_SUIT_BEGIN
