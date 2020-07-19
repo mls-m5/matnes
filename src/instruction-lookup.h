@@ -100,7 +100,7 @@ constexpr auto getInstructionFunction(Instruction instruction) {
     return instructionNames[instruction].function;
 }
 
-Instruction getInstructionEnum(const std::string &name) {
+inline Instruction getInstructionEnum(const std::string &name) {
     for (auto &pair : instructionNames) {
         if (pair.name == name) {
             return pair.instruction;

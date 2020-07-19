@@ -15,11 +15,15 @@ TEST_SUIT_BEGIN
 TEST_CASE("ADC") {
     ASSERT_EQ(translateAssemblyLine("ADC #$AB"), "\x69\xab");
     ASSERT_EQ(translateAssemblyLine("ADC $AB"), "\x65\xab");
-    ASSERT_EQ(translateAssemblyLine("ADC $ABCD"), "\x60\xab\xcd");
+    ASSERT_EQ(translateAssemblyLine("ADC $ABCD"), "\x6D\xab\xcd");
 }
 
 TEST_CASE("LDA") {
     ASSERT_EQ(translateAssemblyLine("LDA #$AB"), "\xa9\xab");
+}
+
+TEST_CASE("CLI") {
+    ASSERT_EQ(translateAssemblyLine("CLI"), "\x58");
 }
 
 TEST_SUIT_END

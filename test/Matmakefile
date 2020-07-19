@@ -1,18 +1,22 @@
 
 config += Wall debug c++17
 
+define += TEST
+
 includes +=
    ../lib/matgui/include
    ../src
 
-src +=
+nestest.src +=
    ../src/*.cpp
    ../lib/matgui/src/*.cpp
 
-libs += -lGL -lSDL2 -lSDL2_image
+nestest.libs += -lGL -lSDL2 -lSDL2_image
 
-define += TEST
+nestest.out = shared nestest
 
-assembler_test.src += %.cpp
-instruction_test.src += %.cpp
-cpu_register_test.src += %.cpp
+link = nestest
+
+assembler_test.src = %.cpp
+instruction_test.src = %.cpp
+cpu_register_test.src = %.cpp
