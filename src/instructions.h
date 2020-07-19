@@ -2,7 +2,13 @@
 
 #include "execution-times.h"
 
+#include <string>
+#include <utility>
+
 // http://nesdev.com/6502.txt
+
+namespace matnes {
+namespace cpu {
 
 enum Instruction {
     ADC, // Add Memory to Accumulator with Carry
@@ -93,3 +99,6 @@ enum MemoryMode {
     Indirect,
     AbsoluteIndirect, // Only used in one op
 };
+
+} // namespace cpu
+} // namespace matnes

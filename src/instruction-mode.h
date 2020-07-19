@@ -2,14 +2,15 @@
 
 #include "cpu.h"
 #include "execution-times.h"
+#include "instruction-lookup.h"
 #include "instructions.h"
 
 namespace matnes {
 namespace cpu {
 
-typedef decltype(&Cpu::accumculator) MemoryFunctionType;
-
 struct InstructionInfo {
+    typedef decltype(&Cpu::accumculator) MemoryFunctionType;
+    typedef decltype(&Cpu::ADC) InstructionFunctionType;
 
     constexpr MemoryFunctionType getMemoryFunction(MemoryMode mode) {
         switch (mode) {
@@ -50,7 +51,8 @@ struct InstructionInfo {
                               MemoryMode mode = Implied)
         : instruction(instruction), mode(mode),
           extraPagingTime(getExecutionTime(instruction, mode) < 0),
-          memoryFunction(getMemoryFunction(mode)) {
+          memoryFunction(getMemoryFunction(mode)),
+          instructionFunction(getInstructionFunction(instruction)) {
     }
 
     constexpr InstructionInfo() = default;
@@ -62,6 +64,7 @@ struct InstructionInfo {
     bool extraPagingTime = false;
     int executionTime = 0;
     MemoryFunctionType memoryFunction = 0;
+    InstructionFunctionType instructionFunction = 0;
 };
 
 constexpr InstructionInfo instructionModes[] = {
