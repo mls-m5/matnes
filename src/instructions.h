@@ -6,7 +6,7 @@
 
 enum Instruction {
     ADC, // Add Memory to Accumulator with Carry
-    AND, //"AND" Memory with Accumulator
+    AND, // "AND" Memory with Accumulator
     ASL, // Shift Left One Bit (Memory or Accumulator)
 
     BCC, // Branch on Carry Clear

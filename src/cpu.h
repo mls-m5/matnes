@@ -26,16 +26,13 @@ public:
     constexpr Cpu() = default;
 
     constexpr bool statusFlag(uint8_t index) const {
-        return _status | (1 << index);
+        return _status & (1 << index);
     }
 
+    //! Set a status flag to a spcific value
     constexpr void statusFlag(uint8_t index, bool value) {
-        if (value) {
-            _status = (_status | (1 << index));
-        }
-        else {
-            _status = (_status | ~(static_cast<uint8_t>(1 << index)));
-        }
+        uint8_t mask = ~(1 << index);
+        _status = (_status & mask) | value << index;
     }
 
     constexpr void A(uint8_t value) {
@@ -74,11 +71,24 @@ public:
         _stackPointer = value;
     }
 
+    [[nodiscard]] constexpr auto PC() const {
+        return _programCounter;
+    }
+
+    constexpr void PC(uint8_t value) {
+        _programCounter = value;
+    }
+
     constexpr uint8_t pull() {
         // Todo check if order is correct;
         auto value = ramBig(_stackPointer);
         ++_stackPointer;
         return value;
+    }
+
+    constexpr uint16_t pullBig() {
+        uint8_t value = pull();
+        return value | (pull() << 8);
     }
 
     constexpr void push(uint8_t value) {
@@ -87,8 +97,12 @@ public:
         ramBig(_stackPointer) = value;
     }
 
-    // Status flags ----------------------------
+    constexpr void pushBig(uint16_t value) {
+        push(value >> 8);
+        push(value & 0xff);
+    }
 
+    //! S is for stack
     [[nodiscard]] constexpr uint8_t S() {
         return _stackPointer;
     }
@@ -96,6 +110,17 @@ public:
     constexpr void S(uint8_t value) {
         _stackPointer = value;
     }
+
+    //! P is for processor status
+    [[nodiscard]] constexpr uint8_t P() {
+        return _status;
+    }
+
+    constexpr void P(uint8_t value) {
+        _status = value;
+    }
+
+    // Status flags ----------------------------
 
     //! C
     [[nodiscard]] constexpr bool carry() const {
@@ -221,6 +246,18 @@ public:
 
     // continue here.. uppward
 
+    constexpr void DEC(uint8_t &memory) {
+        --memory;
+    }
+
+    constexpr void DEX(uint8_t &) {
+        X(X() - 1);
+    }
+
+    constexpr void DEY(uint8_t &) {
+        Y(Y() - 1);
+    }
+
     constexpr void EOR(uint8_t &memory) {
         A(updateStatus(A() ^ memory));
     }
@@ -308,15 +345,11 @@ public:
 
     constexpr void RTI(uint8_t &) {
         S(pull());
-        uint8_t value = pull();
-        value += pull() * 0x100;
-        _programCounter = value;
+        _programCounter = pullBig();
     }
 
     constexpr void RTS(uint8_t &) {
-        uint16_t value = pull();
-        value += pull() * 0x100 + 1;
-        _programCounter = value;
+        _programCounter = pullBig() + 1;
     }
 
     constexpr void SBC(uint8_t &value) {
@@ -325,6 +358,7 @@ public:
         updateStatus(tmp);
         overflowFlag(((A() ^ tmp) & 0x80) && ((A() ^ tmp) & 0x80));
         carry(!(tmp < 0x100)); // Todo: Check so that this is correct
+        A(tmp);
     }
 
     // set flags
@@ -462,15 +496,27 @@ public:
         return ramBig(srcBig());
     }
 
+    // Use to send in to functions that requires references
+    [[nodiscard]] constexpr uint8_t &dummy() {
+        return _dummy;
+    }
+
+    constexpr void dummy(uint8_t value) {
+        _dummy = value;
+    }
+
 private:
+    // startup state:
+    // https://wiki.nesdev.com/w/index.php/CPU_power_up_state#cite_note-reset-stack-push-3
+
     // Registers
     uint8_t _dummy = 0; // When need to return a reference
     uint8_t _accumulator = 0;
     uint8_t _xIndex = 0;
     uint8_t _yIndex = 0;
-    uint8_t _status = 1 << 5;
+    uint8_t _status = 1 << 5; // also called P
     uint16_t _programCounter = 0;
-    uint16_t _stackPointer = 0;
+    uint16_t _stackPointer = 0xfd;
 
     std::array<uint8_t, 1024 * 2> _ram = {};
 };
