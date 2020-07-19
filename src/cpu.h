@@ -34,6 +34,16 @@ class Cpu {
 public:
     constexpr Cpu() = default;
 
+    //! Setup the right registers and values
+    constexpr void start() {
+        disableInterupts(true);
+        decimalFlag(false);
+        PCL(ramBig(0xfffc));
+        PCL(ramBig(0xfffd));
+    }
+
+    // Internal data
+
     constexpr bool statusFlag(uint8_t index) const {
         return _status & (1 << index);
     }
@@ -86,6 +96,14 @@ public:
 
     constexpr void PC(uint8_t value) {
         _programCounter = value;
+    }
+
+    constexpr void PCH(uint8_t value) {
+        _programCounter = (_programCounter & 0xff) | value;
+    }
+
+    constexpr void PCL(uint8_t value) {
+        _programCounter = (_programCounter & 0xff00) | (value << 8);
     }
 
     constexpr uint8_t pull() {
@@ -268,7 +286,8 @@ public:
         return value;
     }
 
-    constexpr uint16_t relativeAddress(uint16_t value) {
+    //! Note that the argument is int8_t (signed)
+    constexpr uint16_t relativeAddress(int8_t value) {
         return _programCounter + value;
     }
 
@@ -279,6 +298,7 @@ public:
         if (isDifferentPage(_programCounter, newAddress)) {
             ++_extraClockCycles;
         }
+        _programCounter = newAddress;
     }
 
     // ---------------------- Instructions -------------------------------------
