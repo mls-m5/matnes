@@ -3,6 +3,8 @@
 #include "mls-unit-test/unittest.h"
 #include "staticmessage.h"
 
+using namespace matnes::cpu;
+
 TEST_SUIT_BEGIN
 
 TEST_CASE("disableInterrupts") {

@@ -12,6 +12,98 @@ TEST_SUIT_BEGIN
 //    constexpr auto value = cpu(0b1).dummy();
 //    StaticMessage<value>();
 
+TEST_CASE("BCC, BCS, BEQ, BMI, BNE, BPL, BVC, BVS") {
+    //    typedef void (Cpu::*StatusFunctionType)(bool);
+    typedef decltype(&Cpu::BCC) FunctionType;
+
+    constexpr auto start = Cpu().PC();
+
+    constexpr auto cpu = [](FunctionType f, uint8_t status, uint8_t newAddres) {
+        Cpu cpu;
+
+        cpu.status(status);
+        (cpu.*f)(newAddres);
+
+        return cpu;
+    };
+
+    static_assert(cpu(&Cpu::BCC, uint8_t(0), 10).PC() == start + 10, "BCC");
+    static_assert(cpu(&Cpu::BCC, ~uint8_t(0), 10).PC() == 0, "BCC");
+
+    static_assert(cpu(&Cpu::BCS, ~uint8_t(0), 10).PC() == start + 10, "BCS");
+    static_assert(cpu(&Cpu::BCS, uint8_t(0), 10).PC() == 0, "BCS");
+
+    static_assert(cpu(&Cpu::BEQ, ~uint8_t(0), 10).PC() == start + 10, "BEQ");
+    static_assert(cpu(&Cpu::BEQ, uint8_t(0), 10).PC() == 0, "BEQ");
+
+    static_assert(cpu(&Cpu::BMI, ~uint8_t(0), 10).PC() == start + 10, "BMI");
+    static_assert(cpu(&Cpu::BMI, uint8_t(0), 10).PC() == 0, "BMI");
+
+    static_assert(cpu(&Cpu::BNE, uint8_t(0), 10).PC() == start + 10, "BNE");
+    static_assert(cpu(&Cpu::BNE, ~uint8_t(0), 10).PC() == 0, "BNE");
+
+    static_assert(cpu(&Cpu::BPL, uint8_t(0), 10).PC() == start + 10, "BPL");
+    static_assert(cpu(&Cpu::BPL, ~uint8_t(0), 10).PC() == 0, "BPL");
+
+    static_assert(cpu(&Cpu::BVC, uint8_t(0), 10).PC() == start + 10, "BVC");
+    static_assert(cpu(&Cpu::BVC, ~uint8_t(0), 10).PC() == 0, "BVC");
+
+    static_assert(cpu(&Cpu::BVS, ~uint8_t(0), 10).PC() == start + 10, "BVS");
+    static_assert(cpu(&Cpu::BVS, uint8_t(0), 10).PC() == 0, "BVS");
+}
+
+TEST_CASE("CLC, CLD, CLI, CLV") {
+    typedef decltype(&Cpu::CLC) FunctionType;
+
+    constexpr auto cpu = [](FunctionType f) {
+        Cpu cpu;
+        cpu.status(~0);
+        (cpu.*f)(cpu.dummy());
+        return cpu;
+    };
+
+    static_assert(cpu(&Cpu::CLC).carry() == false, "CLC");
+    static_assert(cpu(&Cpu::CLD).decimalFlag() == false, "CLD");
+    static_assert(cpu(&Cpu::CLI).disableInterupts() == false, "CLI");
+    static_assert(cpu(&Cpu::CLV).overflowFlag() == false, "CLV");
+}
+
+TEST_CASE("CMP") {
+    constexpr auto cpu = [](uint8_t accumulator, uint8_t value) {
+        Cpu cpu;
+        cpu.A(accumulator);
+        cpu.CMP(value);
+        return cpu;
+    };
+
+    static_assert(cpu(10, 10).zero(), "CMP");
+    static_assert(cpu(10, 11).zero() == false, "CMP");
+}
+
+TEST_CASE("CPX") {
+    constexpr auto cpu = [](uint8_t accumulator, uint8_t value) {
+        Cpu cpu;
+        cpu.X(accumulator);
+        cpu.CPX(value);
+        return cpu;
+    };
+
+    static_assert(cpu(10, 10).zero(), "CPX");
+    static_assert(cpu(10, 11).zero() == false, "CPX");
+}
+
+TEST_CASE("CPY") {
+    constexpr auto cpu = [](uint8_t accumulator, uint8_t value) {
+        Cpu cpu;
+        cpu.Y(accumulator);
+        cpu.CPY(value);
+        return cpu;
+    };
+
+    static_assert(cpu(10, 10).zero(), "CPY");
+    static_assert(cpu(10, 11).zero() == false, "CPY");
+}
+
 TEST_CASE("DEC") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;

@@ -376,11 +376,11 @@ public:
         disableInterupts(false);
     }
 
-    constexpr void CLY(uint8_t &) {
+    constexpr void CLV(uint8_t &) {
         overflowFlag(false);
     }
 
-    constexpr void CPM(uint8_t &memory) {
+    constexpr void CMP(uint8_t &memory) {
         auto tmp = static_cast<uint16_t>(A()) - memory;
         updateStatus(tmp);
         carry(tmp > 0xff);
