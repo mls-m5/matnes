@@ -4,6 +4,7 @@
 
 // Registers described
 // https://en.wikibooks.org/wiki/NES_Programming
+// https://en.wikibooks.org/wiki/NES_Programming/Memory_Map
 
 namespace matnes {
 
@@ -27,27 +28,30 @@ bool Ppu::write(uint16_t address, uint8_t value) {
     //    $2006 - write only - PPU Memory Address - indexing into PPU memory
     //    location $2007 - read / write - PPU Memory Data - data to read from a
     //    PPU memory location or write to a PPU memory location
+
     if (inRange(address)) {
+        address = address - 0x2000;
+        address = address % 8;
         switch (address) {
-        case 0x2000:
+        case 0:
             _register1 = value;
             return true;
-        case 0x2001:
+        case 1:
             _register2 = value;
             return true;
-        case 0x2003:
+        case 3:
             _spriteMemoryAddress = value;
             return true;
-        case 0x2004:
+        case 4:
             spriteMemoryData(value);
             return true;
-        case 0x2005:
+        case 5:
             _backgroundScroll = value;
             return true;
-        case 0x2006:
+        case 6:
             _ppuMemoryAddress = value;
             return true;
-        case 0x2007:
+        case 7:
             ppuMemoryData(value);
             return true;
         }
@@ -61,12 +65,15 @@ bool Ppu::write(uint16_t address, uint8_t value) {
 
 std::optional<uint8_t> Ppu::read(uint16_t address) {
     if (inRange(address)) {
+        // Memory is mirrored
+        address -= 0x2000;
+        address = address % 8;
         switch (address) {
-        case 0x2002:
+        case 2:
             return _status;
-        case 0x2004:
+        case 4:
             return spriteMemoryData();
-        case 0x2007:
+        case 7:
             return ppuMemoryData();
         }
     }

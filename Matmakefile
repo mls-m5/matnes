@@ -1,21 +1,53 @@
 # Matmake file
 # https://github.com/mls-m5/matmake
 
+# ===== global config =====
+
 config +=
     c++17
     Wall
 
-main.includes +=
-    include
+include +=
+   include
+
+
+# ===== PPU ================
+
+ppu.includes +=
     lib/matgui/include
     lib/matmath/include
 
-main.src =
-    src/*.cpp
+ppu.src +=
+    src/ppu.cpp
     lib/matgui/src/*.cpp
+
+ppu.libs = -lGL -lSDL2 -lSDL2_image
+
+ppu.out = shared ppu
+
+
+# ===== CPU =================
+
+cpu.src = src/cpu.cpp
+cpu.out = shared cpu
+
+
+# ===== APU =================
+
+apu.src = src/apu.cpp
+apu.out = shared apu
+
+
+# ====== main ===============
+
+main.includes +=
+    lib/matgui/include
+
+main.src =
+    src/main.cpp
 
 main.dir = build
 
-main.libs = -lGL -lSDL2 -lSDL2_image
+main.link = cpu apu ppu
 
 external test

@@ -21,8 +21,9 @@ public:
 
 private:
     constexpr bool inRange(uint16_t address) {
-        return (address >= 0x2000 && address <= 0x2007) ||
-               (address >= 0x4000 && address <= 0x4017);
+        return address >= 0x2000 && address < 4000;
+        //        return (address >= 0x2000 && address <= 0x2007) ||
+        //               (address >= 0x4000 && address <= 0x4017);
     }
 
 private:

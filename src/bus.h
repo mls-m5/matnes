@@ -26,9 +26,10 @@ class Bus {
     constexpr Bus &operator=(const Bus &) = default;
 
     constexpr void write(uint16_t address, uint8_t value) {
-        if (address < _ram.size()) {
+        if (address < _ram.size() * 4) {
+            // Ram is mirrored 4 times
+            _ram.at(address % _ram.size());
         }
-
         else {
             for (size_t i = 0; i < _nConnections; ++i) {
                 if (_components[i]->write(address, value)) {
@@ -39,8 +40,9 @@ class Bus {
     }
 
     constexpr uint8_t read(uint16_t address) {
-        if (address < _ram.size()) {
-            return _ram.at(address);
+        if (address < _ram.size() * 4) {
+            // Ram is mirrored 4 times
+            return _ram.at(address % _ram.size());
         }
         else {
             for (size_t i = 0; i < _nConnections; ++i) {

@@ -1,6 +1,7 @@
 
 *.o
 *.d
+*.so
 build
 .matnes.*
 test/*_test
