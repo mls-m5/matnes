@@ -2,6 +2,7 @@
 
 // http://nesdev.com/6502.txt
 
+#include "ibus.h"
 #include <array>
 #include <cstdint>
 
@@ -32,7 +33,8 @@ class NotImplementedError : public std::logic_error {
 
 class Cpu {
 public:
-    constexpr Cpu() = default;
+    constexpr Cpu(Bus *bus = nullptr) : _bus(bus) {
+    }
 
     //! Setup the right registers and values
     constexpr void start() {
@@ -110,8 +112,8 @@ public:
 
     constexpr uint8_t pull() {
         // Todo check if order is correct;
-        auto value = ramBig(_stackPointer);
         ++_stackPointer;
+        auto value = ramBig(_stackPointer);
         return value;
     }
 
@@ -122,8 +124,8 @@ public:
 
     constexpr void push(uint8_t value) {
         // Todo: Check if order (decreesing and saving) is correct
-        --_stackPointer;
         ramBig(_stackPointer) = value;
+        --_stackPointer;
     }
 
     constexpr void pushBig(uint16_t value) {
@@ -233,6 +235,8 @@ public:
     // -----------------------
 
     [[nodiscard]] constexpr uint8_t &ram(uint8_t index1, uint8_t index2 = 0) {
+        if (_bus) {
+        }
         return _ram[(static_cast<int>(index2) << 8) + index1];
     }
 
@@ -241,9 +245,13 @@ public:
         return _ram[index];
     }
 
+    [[nodiscard]] constexpr uint8_t ramBig(uint16_t index) const {
+        return _ram[index];
+    }
+
     //! The current instruction
     [[nodiscard]] constexpr uint8_t instruction() const {
-        return _ram.at(_programCounter);
+        return ramBig(_programCounter);
     }
 
     //! Argument 1
@@ -701,6 +709,8 @@ private:
     uint8_t _extraClockCycles = 0; // If instruction demands more time
 
     std::array<uint8_t, 1024 * 2> _ram = {};
+
+    Bus *_bus = nullptr;
 };
 
 } // namespace cpu
