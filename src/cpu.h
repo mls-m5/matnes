@@ -2,7 +2,7 @@
 
 // http://nesdev.com/6502.txt
 
-#include "ibus.h"
+#include "bus.h"
 #include <array>
 #include <cstdint>
 

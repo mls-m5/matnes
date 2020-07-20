@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace matgui;
+using namespace matnes;
 
 #ifndef TEST
 

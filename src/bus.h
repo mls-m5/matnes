@@ -17,6 +17,9 @@ public:
     virtual std::optional<uint8_t> read(uint16_t address) = 0;
 };
 
+//! A bus from the cpu to memory etc.
+//! The 2k register is built in to make the raw buss constexpr
+//! for testing
 class Bus {
     constexpr Bus() = default;
     constexpr Bus(const Bus &) = default;
