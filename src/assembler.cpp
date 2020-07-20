@@ -77,11 +77,18 @@ std::string translateAssemblyLine(const std::string line) {
 }
 
 Assembler::Assembler(std::istream &stream) : _stream(stream) {
+    size_t memoryAddress = 0;
+
     for (std::string line; getline(stream, line);) {
         if (line.empty()) {
             continue;
         }
 
         auto raw = translateAssemblyLine(line);
+
+        for (auto c : raw) {
+            _memory.at(memoryAddress) = c;
+            ++memoryAddress;
+        }
     }
 }
