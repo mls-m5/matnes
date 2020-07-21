@@ -1,9 +1,114 @@
 #pragma once
 
 #include "bus.h"
+#include <array>
 #include <cstdint>
 
 namespace matnes {
+
+namespace apu {
+
+class PulseMemory {
+public:
+    constexpr PulseMemory() = default;
+
+    constexpr void write(uint8_t index, uint8_t value) {
+        _memory[index] = value;
+    }
+
+    constexpr uint8_t read(uint8_t index) const {
+        return _memory[index];
+    }
+
+    //! For more information
+    //! https://wiki.nesdev.com/w/index.php/APU#Pulse_.28.244000-4007.29
+    constexpr uint8_t duty() {
+        return _memory[0] >> 6;
+    }
+
+    //! Same bit as length counter halt
+    constexpr bool envelopeLoop() {
+        return (_memory[0] >> 5) & 1;
+    }
+
+    constexpr bool constatVolume() {
+        return (_memory[0] >> 4) & 1;
+    }
+
+    //! Same as envelope
+    constexpr uint8_t volume() {
+        return _memory[0] & 0b1111;
+    }
+
+    constexpr bool sweepUnitEnabled() {
+        return _memory[1] >> 7;
+    }
+
+    constexpr uint8_t period() {
+        return (_memory[1] >> 4) & 0b111;
+    }
+
+    constexpr bool negative() {
+        return _memory[1] & 0b11000;
+    }
+
+    constexpr uint8_t shift() {
+        return _memory[1] & 0b111;
+    }
+
+    constexpr uint8_t timerLow() {
+        return _memory[2];
+    }
+
+    constexpr uint8_t timerHigh() {
+        return _memory[3] & 0b111;
+    }
+
+    constexpr uint16_t timer() {
+        return timerLow() + (timerHigh() << 8);
+    }
+
+    constexpr uint8_t lengthCounterLoad() {
+        return _memory[3] >> 3;
+    }
+
+private:
+    std::array<uint8_t, 4> _memory = {};
+};
+
+class Pulse {
+public:
+    constexpr Pulse(PulseMemory &memory) : _memory(memory) {
+    }
+
+    constexpr void write(uint8_t index, uint8_t value) {
+        if (index == 3) {
+            _lengthCounter = _memory.lengthCounterLoad();
+            _envelope = 15;
+        }
+        _memory.write(index, value);
+    }
+
+    constexpr uint8_t read(uint8_t index) const {
+        return _memory.read(index);
+    }
+
+    constexpr void tick() {
+        //        if (_lengthCounter) {
+        //            --_lengthCounter;
+        //        }
+        //        if ( _memory._envelope) {
+        //            --_envelope;
+        //        }
+    }
+
+private:
+    PulseMemory &_memory;
+    uint8_t _lengthCounter = 0;
+    uint8_t _envelope = 0;
+};
+
+} // namespace apu
 
 class Apu : public IBusComponent {
 
