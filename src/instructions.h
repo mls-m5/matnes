@@ -81,6 +81,8 @@ enum Instruction {
     TXA, // Transfer Index X to Accumulator
     TXS, // Transfer Index X to Stack Pointer
     TYA, // Transfer Index Y to Accumulator
+
+    Illegal, // When the opcode is not defined
 };
 
 enum MemoryMode {

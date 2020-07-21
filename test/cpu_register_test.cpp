@@ -71,4 +71,18 @@ TEST_CASE("store and load") {
     static_assert(cpu(100).load() == 100, "store/load");
 }
 
+TEST_CASE("store to registers") {
+    constexpr auto cpu = [](uint16_t value) {
+        Cpu cpu;
+
+        (void)cpu.accumculator();
+
+        cpu.store(value);
+
+        return cpu;
+    };
+
+    static_assert(cpu(10).A(), "accumulator");
+}
+
 TEST_SUIT_END

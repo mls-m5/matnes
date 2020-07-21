@@ -77,7 +77,7 @@ struct InstructionInfo {
     constexpr InstructionInfo(const InstructionInfo &) = default;
     constexpr InstructionInfo &operator=(const InstructionInfo &) = default;
 
-    Instruction instruction = NOP;
+    Instruction instruction = Illegal;
     MemoryMode mode = Implied;
     bool extraPagingTime = false;
     uint8_t opCode = 0;

@@ -262,7 +262,22 @@ public:
 
     // Store to the current address
     constexpr void store(uint8_t value) {
-        store(_ramAddress, value);
+        switch (_saveTarget) {
+        case MemorySaveTarget::Memory:
+            store(_ramAddress, value);
+            break;
+        case MemorySaveTarget::Accumulator:
+            A(value);
+            break;
+        case MemorySaveTarget::X:
+            X(value);
+            break;
+        case MemorySaveTarget::Y:
+            Y(value);
+            break;
+        default:
+            break;
+        }
     }
 
     // Load from the current address
