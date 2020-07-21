@@ -15,13 +15,13 @@ void Cpu::tick() {
 
     uint8_t opCode = ramBig(_programCounter);
     auto instruction = instructionModes[opCode];
-    src(_programCounter);
+    src(_programCounter + 1);
     src2(_programCounter + 2); // May be unused
     _programCounter += instruction.instructionLength;
 
     _extraClockCycles +=
         instruction.executionTime - 1; // This tick counts as one
 
-    auto &memory = (this->*instruction.memoryFunction)();
+    auto memory = (this->*instruction.memoryFunction)();
     (this->*instruction.instructionFunction)(memory);
 }

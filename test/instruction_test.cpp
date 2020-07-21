@@ -58,7 +58,7 @@ TEST_CASE("CLC, CLD, CLI, CLV") {
     constexpr auto cpu = [](FunctionType f) {
         Cpu cpu;
         cpu.status(~0);
-        (cpu.*f)(cpu.dummy());
+        (cpu.*f)(0);
         return cpu;
     };
 
@@ -107,12 +107,12 @@ TEST_CASE("CPY") {
 TEST_CASE("DEC") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.DEC(cpu.dummy());
+        cpu.store(value);
+        cpu.DEC(cpu.load());
         return cpu;
     };
 
-    static_assert(cpu(121).dummy() == 120, "DEX");
+    static_assert(cpu(121).load() == 120, "DEX");
 }
 
 TEST_CASE("DEX") {
@@ -151,19 +151,19 @@ TEST_CASE("EOR") {
 TEST_CASE("INC") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.INC(cpu.dummy());
+        cpu.store(value);
+        cpu.INC(cpu.load());
         return cpu;
     };
 
-    static_assert(cpu(101).dummy() == 102, "INC");
+    static_assert(cpu(101).load() == 102, "INC");
 }
 
 TEST_CASE("INX") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
         cpu.X(value);
-        cpu.INX(cpu.dummy());
+        cpu.INX();
         return cpu;
     };
 
@@ -174,7 +174,7 @@ TEST_CASE("INY") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
         cpu.Y(value);
-        cpu.INY(cpu.dummy());
+        cpu.INY();
         return cpu;
     };
 
@@ -186,7 +186,7 @@ TEST_CASE("JMP") {
         Cpu cpu;
         // continue here this does not work...
         cpu.srcBig(value); // Set operators
-        cpu.JMP(cpu.dummy());
+        cpu.JMP(cpu.absolute());
         return cpu;
     };
 
@@ -197,7 +197,7 @@ TEST_CASE("JSR") {
     constexpr auto cpu = [](uint16_t value) {
         Cpu cpu;
         cpu.srcBig(value); // Set operators
-        cpu.JSR(cpu.dummy());
+        cpu.JSR(0);
         return cpu;
     };
 
@@ -207,8 +207,8 @@ TEST_CASE("JSR") {
 TEST_CASE("LDA") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.LDA(cpu.dummy());
+        cpu.store(value);
+        cpu.LDA(value);
         return cpu;
     };
 
@@ -218,8 +218,7 @@ TEST_CASE("LDA") {
 TEST_CASE("LDX") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.LDX(cpu.dummy());
+        cpu.LDX(value);
         return cpu;
     };
 
@@ -229,8 +228,7 @@ TEST_CASE("LDX") {
 TEST_CASE("LDY") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.LDY(cpu.dummy());
+        cpu.LDY(value);
         return cpu;
     };
 
@@ -240,14 +238,14 @@ TEST_CASE("LDY") {
 TEST_CASE("LSR") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
-        cpu.dummy(value);
-        cpu.LSR(cpu.dummy());
+        cpu.store(value);
+        cpu.LSR(cpu.load());
         return cpu;
     };
 
-    static_assert(cpu(10).dummy() == (10 >> 1), "LSR");
-    static_assert(cpu(102).dummy() == (102 >> 1), "LSR");
-    static_assert(cpu(1).dummy() == 0, "LSR");
+    static_assert(cpu(10).load() == (10 >> 1), "LSR");
+    static_assert(cpu(102).load() == (102 >> 1), "LSR");
+    static_assert(cpu(1).load() == 0, "LSR");
 }
 
 TEST_CASE("NOP") {
@@ -255,21 +253,21 @@ TEST_CASE("NOP") {
 }
 
 TEST_CASE("ORA") {
-    constexpr auto cpu = [](uint8_t value) {
+    constexpr auto cpu = [](uint8_t accumulator, uint8_t other) {
         Cpu cpu;
-        cpu.push(value);
-        cpu.PLA(cpu.dummy());
+        cpu.A(accumulator);
+        cpu.ORA(other);
         return cpu;
     };
 
-    static_assert(cpu(10).A() == 10, "ORA");
+    static_assert(cpu(0b10, 1).A() == 0b11, "ORA");
 }
 
 TEST_CASE("PLA") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
         cpu.push(value);
-        cpu.PLA(cpu.dummy());
+        cpu.PLA();
         return cpu;
     };
 
@@ -280,7 +278,7 @@ TEST_CASE("PLP") {
     constexpr auto cpu = [](uint8_t value) {
         Cpu cpu;
         cpu.push(value);
-        cpu.PLP(cpu.dummy());
+        cpu.PLP();
         return cpu;
     };
 
@@ -290,44 +288,44 @@ TEST_CASE("PLP") {
 TEST_CASE("ROL") {
     constexpr auto cpu = [](uint8_t value, bool carry) {
         Cpu cpu;
-        cpu.dummy(value);
+        cpu.store(value);
         cpu.carry(carry);
-        cpu.ROL(cpu.dummy());
+        cpu.ROL(value);
         return cpu;
     };
 
-    static_assert(cpu(0b101, 0).dummy() == 0b1010, "ROL");
+    static_assert(cpu(0b101, 0).load() == 0b1010, "ROL");
     static_assert(cpu(0b101, 0).carry() == false, "ROL");
 
-    static_assert(cpu(0b100, 0).dummy() == 0b1000, "ROL");
+    static_assert(cpu(0b100, 0).load() == 0b1000, "ROL");
     static_assert(cpu(0b100, 0).carry() == false, "ROL");
 
-    static_assert(cpu(0b1, 0).dummy() == 0b10, "ROL");
+    static_assert(cpu(0b1, 0).load() == 0b10, "ROL");
     static_assert(cpu(0b1, 0).carry() == false, "ROL");
 
-    static_assert(cpu(0b0, 1).dummy() == (1), "ROL");
+    static_assert(cpu(0b0, 1).load() == (1), "ROL");
     static_assert(cpu(0b0, 1).carry() == false, "ROL");
 }
 
 TEST_CASE("ROR") {
     constexpr auto cpu = [](uint8_t value, bool carry) {
         Cpu cpu;
-        cpu.dummy(value);
+        cpu.store(value);
         cpu.carry(carry);
-        cpu.ROR(cpu.dummy());
+        cpu.ROR(value);
         return cpu;
     };
 
-    static_assert(cpu(0b101, 0).dummy() == 0b10, "ROR");
+    static_assert(cpu(0b101, 0).load() == 0b10, "ROR");
     static_assert(cpu(0b101, 0).carry() == true, "ROR");
 
-    static_assert(cpu(0b100, 0).dummy() == 0b10, "ROR");
+    static_assert(cpu(0b100, 0).load() == 0b10, "ROR");
     static_assert(cpu(0b100, 0).carry() == false, "ROR");
 
-    static_assert(cpu(0b1, 0).dummy() == 0, "ROR");
+    static_assert(cpu(0b1, 0).load() == 0, "ROR");
     static_assert(cpu(0b1, 0).carry() == true, "ROR");
 
-    static_assert(cpu(0b0, 1).dummy() == (1 << 7), "ROR");
+    static_assert(cpu(0b0, 1).load() == (1 << 7), "ROR");
     static_assert(cpu(0b0, 1).carry() == false, "ROR");
 }
 
@@ -336,7 +334,7 @@ TEST_CASE("RTI") {
         Cpu cpu;
         cpu.pushBig(stackValue);
         cpu.push(status);
-        cpu.RTI(cpu.dummy());
+        cpu.RTI();
         return cpu;
     };
 
@@ -348,7 +346,7 @@ TEST_CASE("RTS") {
     constexpr auto cpu = [](uint8_t stackValue) {
         Cpu cpu;
         cpu.push(stackValue);
-        cpu.RTS(cpu.dummy());
+        cpu.RTS();
         return cpu;
     };
     static_assert(cpu(10).PC() == 11, "RTS");
@@ -371,7 +369,7 @@ TEST_CASE("SBC") {
 TEST_CASE("SED") {
     constexpr auto cpu = []() {
         Cpu cpu;
-        cpu.SED(cpu.dummy());
+        cpu.SED();
         return cpu;
     };
     static_assert(cpu().decimalFlag(), "SED");
@@ -380,7 +378,7 @@ TEST_CASE("SED") {
 TEST_CASE("SEI") {
     constexpr auto cpu = []() {
         Cpu cpu;
-        cpu.SEI(cpu.dummy());
+        cpu.SEI();
         return cpu;
     };
     static_assert(cpu().disableInterupts(), "SEI");
@@ -390,37 +388,38 @@ TEST_CASE("STA") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.A(35);
-        cpu.STA(cpu.dummy());
+        cpu.STA();
         return cpu;
     };
-    static_assert(cpu().dummy() == 35, "STA");
+    static_assert(cpu().load() == 35, "STA");
 }
 
 TEST_CASE("STX") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.X(35);
-        cpu.STX(cpu.dummy());
+        cpu.STX();
         return cpu;
     };
-    static_assert(cpu().dummy() == 35, "STX");
+    static_assert(cpu().load() == 35, "STX");
 }
 
 TEST_CASE("STY") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.Y(35);
-        cpu.STY(cpu.dummy());
+        cpu.STY();
         return cpu;
     };
-    static_assert(cpu().dummy() == 35, "STY");
+
+    static_assert(cpu().load() == 35, "STY");
 }
 
 TEST_CASE("TAX") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.A(35);
-        cpu.TAX(cpu.dummy());
+        cpu.TAX();
         return cpu;
     };
     static_assert(cpu().X() == 35, "TAX");
@@ -430,7 +429,7 @@ TEST_CASE("TAY") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.A(35);
-        cpu.TAY(cpu.dummy());
+        cpu.TAY();
         return cpu;
     };
     static_assert(cpu().Y() == 35, "TAY");
@@ -440,7 +439,7 @@ TEST_CASE("TSX") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.stack(35);
-        cpu.TSX(cpu.dummy());
+        cpu.TSX();
         return cpu;
     };
     static_assert(cpu().X() == 35, "TSX");
@@ -450,7 +449,7 @@ TEST_CASE("TXA") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.X(35);
-        cpu.TXA(cpu.dummy());
+        cpu.TXA();
         return cpu;
     };
     static_assert(cpu().A() == 35, "TXA");
@@ -460,7 +459,7 @@ TEST_CASE("TXS") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.X(35);
-        cpu.TXS(cpu.dummy());
+        cpu.TXS();
         return cpu;
     };
 
@@ -471,7 +470,7 @@ TEST_CASE("TYA") {
     constexpr auto cpu = []() {
         Cpu cpu;
         cpu.Y(42);
-        cpu.TYA(cpu.dummy());
+        cpu.TYA();
         return cpu;
     };
 

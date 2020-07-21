@@ -21,6 +21,7 @@ public:
 //! The 2k register is built in to make the raw buss constexpr
 //! for testing
 class Bus {
+public:
     constexpr Bus() = default;
     constexpr Bus(const Bus &) = default;
     constexpr Bus &operator=(const Bus &) = default;
@@ -28,7 +29,7 @@ class Bus {
     constexpr void write(uint16_t address, uint8_t value) {
         if (address < _ram.size() * 4) {
             // Ram is mirrored 4 times
-            _ram.at(address % _ram.size());
+            _ram.at(address % _ram.size()) = value;
         }
         else {
             for (size_t i = 0; i < _nConnections; ++i) {
@@ -39,7 +40,7 @@ class Bus {
         }
     }
 
-    constexpr uint8_t read(uint16_t address) {
+    constexpr uint8_t read(uint16_t address) const {
         if (address < _ram.size() * 4) {
             // Ram is mirrored 4 times
             return _ram.at(address % _ram.size());

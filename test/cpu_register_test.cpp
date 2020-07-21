@@ -59,4 +59,16 @@ TEST_CASE("stackBig") {
     static_assert(cpu(1010).pullBig() == 1010, "stack");
 }
 
+TEST_CASE("store and load") {
+    constexpr auto cpu = [](uint16_t value) {
+        Cpu cpu;
+
+        cpu.store(value);
+
+        return cpu;
+    };
+
+    static_assert(cpu(100).load() == 100, "store/load");
+}
+
 TEST_SUIT_END
