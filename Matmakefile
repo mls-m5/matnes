@@ -25,7 +25,6 @@ ppu.libs = -lGL -lSDL2 -lSDL2_image
 
 ppu.out = shared ppu
 
-
 # ===== CPU =================
 
 cpu.src = src/cpu.cpp
@@ -38,6 +37,13 @@ apu.src = src/apu.cpp
 apu.out = shared apu
 
 
+# ===== ROM =================
+
+rom.src =
+    src/loadnes.cpp
+rom.out = shared rom
+
+
 # ====== main ===============
 
 main.includes +=
@@ -48,6 +54,6 @@ main.src =
 
 main.dir = build
 
-main.link = cpu apu ppu
+main.link = cpu apu ppu rom
 
 external test

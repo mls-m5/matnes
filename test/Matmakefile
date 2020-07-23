@@ -20,3 +20,4 @@ link = nestest
 assembler_test.src = %.cpp
 instruction_test.src = %.cpp
 cpu_register_test.src = %.cpp
+rom_loader_test.src = %.cpp

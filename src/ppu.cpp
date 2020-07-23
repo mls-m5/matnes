@@ -8,6 +8,26 @@
 
 namespace matnes {
 
+//! Character rom = "pattern memory" ie sprites (mostly)
+//! Name table memory"Vram" is much about layout
+//! and palette memory is much about... well palette
+//! Memory layout of the ppu
+//! 0x0-0x1FFF Chrrom
+//! 0x2000-0x3FFF Name table memory
+//! 0x3F00-0x3FFF Palette memory
+//!
+//! A tile is 8x8 pixels two planes
+//! Low significant bit plane and most significant bit plane
+//! Bit value of 0 use to be transparent
+//!
+//! Pallettes
+//! 0x3f00 (background pallette)
+//! 0x3f01 Pallette 1
+//! 0x3f05 Pellette 2 etc
+//!
+//! The screen is 256x240 but the scanlines is 341x261
+//! Most of the changes to the ppu is done during the vertical blank period
+//! The ppu can also trigger interupts to the cpu
 Ppu::Ppu() {
     _testPaint.line.color(1, 1, 1);
 }
@@ -34,10 +54,10 @@ bool Ppu::write(uint16_t address, uint8_t value) {
         address = address % 8;
         switch (address) {
         case 0:
-            _register1 = value;
+            _ctrl = value;
             return true;
         case 1:
-            _register2 = value;
+            _mask = value;
             return true;
         case 3:
             _spriteMemoryAddress = value;

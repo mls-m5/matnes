@@ -44,13 +44,15 @@ private:
     void ppuMemoryData(uint8_t) {
     }
 
-    uint8_t _register1 = 0; // PPUCTRL 2000
-    uint8_t _register2 = 0; // PPUMASK 2001
-    uint8_t _status = 0;    // PPUSTATUS 2002
+    uint8_t _ctrl = 0;             // PPUCTRL 2000
+    uint8_t _mask = 0;             // PPUMASK 2001
+    uint8_t _status = 0;           // PPUSTATUS 2002
+    uint8_t _unused = 0;           //
+    uint8_t _unused2 = 0;          //
+    uint8_t _backgroundScroll = 0; // PPUSCROLL 2005
 
     uint8_t _spriteMemoryAddress = 0; // OAMADDR
     uint8_t _ppuMemoryAddress = 0;    // PPUADDR
-    uint8_t _backgroundScroll = 0;    // PPUSCROLL
 };
 
 } // namespace matnes

@@ -53,6 +53,7 @@ struct InstructionInfo {
         case Absolute:
         case AbsoluteX:
         case AbsoluteY:
+        case Indirect:
             return 3;
         case Accumulator:
         case Implied:
