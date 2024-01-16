@@ -1,7 +1,7 @@
 
 #include "matgui/application.h"
 #include "matgui/window.h"
-#include "ppu.h"
+#include "ppuview.h"
 
 using namespace std;
 using namespace matgui;
@@ -17,7 +17,11 @@ int main(int argc, char **argv) {
     window.style.fill.color(.4, 0, 0);
     window.updateStyle();
 
-    window.createChild<Ppu>();
+    auto ppu = Ppu{};
+
+    ppu.drawAll();
+
+    window.createChild<PpuView>()->setPpu(&ppu);
 
     app.mainLoop();
 
@@ -25,5 +29,3 @@ int main(int argc, char **argv) {
 }
 
 #endif
-
-

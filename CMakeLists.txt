@@ -10,6 +10,7 @@ add_executable(
     matnes
     src/main.cpp
     src/ppu.cpp
+    src/ppuview.cpp
     src/cpu.cpp
     src/apu.cpp
     )

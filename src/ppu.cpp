@@ -1,8 +1,5 @@
 #include "ppu.h"
 
-#include "matgui/draw.h"
-#include "matgui/texture.h"
-
 // Registers described
 // https://en.wikibooks.org/wiki/NES_Programming
 // https://en.wikibooks.org/wiki/NES_Programming/Memory_Map
@@ -29,12 +26,9 @@ namespace matnes {
 //! The screen is 256x240 but the scanlines is 341x261
 //! Most of the changes to the ppu is done during the vertical blank period
 //! The ppu can also trigger interupts to the cpu
-Ppu::Ppu() {
-    _testPaint.line.color(1, 1, 1);
-}
 
-Ppu::~Ppu() noexcept {
-}
+
+
 
 bool Ppu::write(uint16_t address, uint8_t value) {
     //    PPU
@@ -99,33 +93,6 @@ std::optional<uint8_t> Ppu::read(uint16_t address) {
         }
     }
     return {};
-}
-
-void Ppu::draw() {
-    _screenMemory.data.at(10) = {255, 255, 255, 255};
-
-    _testPaint.drawLine(0, 0, width(), height());
-
-    // TODO: Somday make this more efficient
-    auto pixels = std::vector<matgui::Texture::Pixel>{};
-
-    pixels.resize(_screenMemory.data.size());
-    for (size_t i = 0; i < _screenMemory.data.size(); ++i) {
-        auto p = _screenMemory.data.at(i);
-        pixels.at(i) = {p.r, p.g, p.b, p.a};
-    }
-    auto texture = matgui::Texture{};
-    texture.createBitmap(pixels, ScreenMemory::width, ScreenMemory::height);
-    texture.interpolation(matgui::Texture::Nearest);
-
-    matgui::drawTextureRect(matgui::vec{0., 0.},
-                            0.,
-                            // static_cast<double>(ScreenMemory::width),
-                            // static_cast<double>(ScreenMemory::height),
-                            width(),
-                            height(),
-                            texture,
-                            matgui::DrawStyle::OrigoTopLeft);
 }
 
 } // namespace matnes
