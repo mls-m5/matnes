@@ -5,6 +5,7 @@
 #include "bus.h"
 #include <array>
 #include <cstdint>
+#include <stdexcept>
 
 namespace matnes {
 namespace cpu {
@@ -34,6 +35,8 @@ constexpr bool isDifferentPage(uint16_t a, uint16_t b) {
 class NotImplementedError : public std::logic_error {
     using logic_error::logic_error;
 };
+
+#undef X
 
 class Cpu {
 public:

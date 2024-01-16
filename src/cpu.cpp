@@ -1,7 +1,5 @@
 #include "cpu.h"
-
 #include "instruction-mode.h"
-
 #include <functional>
 #include <vector>
 

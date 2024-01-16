@@ -8,3 +8,4 @@ test/*_test
 src/tmp.h
 test/nestest.so
 roms/
+.qtc_clangd/

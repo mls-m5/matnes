@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "matgui/draw.h"
+#include "matgui/texture.h"
 
 // Registers described
 // https://en.wikibooks.org/wiki/NES_Programming
@@ -101,7 +102,30 @@ std::optional<uint8_t> Ppu::read(uint16_t address) {
 }
 
 void Ppu::draw() {
+    _screenMemory.data.at(10) = {255, 255, 255, 255};
+
     _testPaint.drawLine(0, 0, width(), height());
+
+    // TODO: Somday make this more efficient
+    auto pixels = std::vector<matgui::Texture::Pixel>{};
+
+    pixels.resize(_screenMemory.data.size());
+    for (size_t i = 0; i < _screenMemory.data.size(); ++i) {
+        auto p = _screenMemory.data.at(i);
+        pixels.at(i) = {p.r, p.g, p.b, p.a};
+    }
+    auto texture = matgui::Texture{};
+    texture.createBitmap(pixels, ScreenMemory::width, ScreenMemory::height);
+    texture.interpolation(matgui::Texture::Nearest);
+
+    matgui::drawTextureRect(matgui::vec{0., 0.},
+                            0.,
+                            // static_cast<double>(ScreenMemory::width),
+                            // static_cast<double>(ScreenMemory::height),
+                            width(),
+                            height(),
+                            texture,
+                            matgui::DrawStyle::OrigoTopLeft);
 }
 
 } // namespace matnes

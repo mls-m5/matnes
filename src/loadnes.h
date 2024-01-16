@@ -21,7 +21,7 @@ struct RomData {
 
         uint8_t padding[15 - 11] = {};
 
-        size_t getProgRomSize() {
+        constexpr size_t getProgRomSize() {
             auto num = (static_cast<size_t>(flags9) << 8) + romSize;
 
             return num * 1024 * 16;
