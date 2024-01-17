@@ -1,11 +1,13 @@
 
 #include "assembler.h"
 #include "instruction-mode.h"
-
+#include <iostream>
 #include <regex>
 #include <vector>
 
 using namespace matnes::cpu;
+
+namespace matnes {
 
 namespace {
 
@@ -34,8 +36,8 @@ std::vector<Translation> translations = {
 } // namespace
 
 std::string translateAssemblyLine(const std::string line) {
-    std::smatch matches;
-    std::string ret;
+    auto matches = std::smatch{};
+    auto ret = std::string{};
     for (auto &translation : translations) {
         if (std::regex_match(line, matches, translation.r)) {
             ret.reserve(matches.size() + 1);
@@ -76,8 +78,9 @@ std::string translateAssemblyLine(const std::string line) {
     return {};
 }
 
-Assembler::Assembler(std::istream &stream) : _stream(stream) {
-    size_t memoryAddress = 0;
+AssembledMemoryT assembleCode(std::istream &stream) {
+    auto memory = AssembledMemoryT{};
+    auto memoryAddress = size_t{0};
 
     for (std::string line; getline(stream, line);) {
         if (line.empty()) {
@@ -87,8 +90,12 @@ Assembler::Assembler(std::istream &stream) : _stream(stream) {
         auto raw = translateAssemblyLine(line);
 
         for (auto c : raw) {
-            _memory.at(memoryAddress) = c;
+            memory.at(memoryAddress) = c;
             ++memoryAddress;
         }
     }
+
+    return memory;
 }
+
+} // namespace matnes

@@ -14,6 +14,7 @@ add_executable(
     src/ppuview.cpp
     src/cpu.cpp
     src/apu.cpp
+    src/assembler.cpp
     )
 
 target_link_libraries(

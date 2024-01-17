@@ -1,7 +1,6 @@
 #pragma once
 
 #include "execution-times.h"
-
 #include <string>
 #include <utility>
 
