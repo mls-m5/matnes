@@ -19,6 +19,9 @@ int main(int argc, char **argv) {
 
     auto ppu = Ppu{};
 
+    ppu.write(0x2003, 3);
+    ppu.write(0x2004, 40);
+
     ppu.drawAll();
 
     window.createChild<PpuView>()->setPpu(&ppu);
