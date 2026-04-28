@@ -9,3 +9,18 @@ src/tmp.h
 test/nestest.so
 roms/
 .qtc_clangd/
+
+build/
+bin/
+
+
+# qtcreator project files
+*.cflags
+*.config
+*.creator
+*.creator.user
+*.cxxflags
+*.files
+*.includes
+.qtc_clangd/
+*.creator.user.*
